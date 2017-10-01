@@ -53,15 +53,18 @@ cv2.setTrackbarPos(vl, wnd,107)
 cv2.setTrackbarPos(vh, wnd,151)
 
 
-
-cap = cv2.VideoCapture(0)
+# http://docs.opencv.org/3.2.0/d4/d73/tutorial_py_contours_begin.html
+# cap = cv2.Vide oCapture(0)
 
 #begin our 'infinite' while loop
 while(1):
 
-    ret, frame = cap.read()
+    frame = cv2.imread(sys.argv[1])
+    # ret, frame = cap.read()
+
     #it is common to apply a blur to the frame
     res = cv2.GaussianBlur(frame,(7,7),0)
+    res = cv2.GaussianBlur(res, (7,7), 0)
     
  
     #convert from a BGR stream to an HSV stream
@@ -81,6 +84,8 @@ while(1):
  
     #create a mask for that range
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
+
+    res2, contours, hierarchy = cv2.findContours()
 
     #res = cv2.bitwise_and(frame,frame, mask =mask)
  
