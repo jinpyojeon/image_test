@@ -8,6 +8,8 @@ import sys
 frame = cv2.imread(sys.argv[1],cv2.CV_LOAD_IMAGE_GRAYSCALE)
 (height, width) = frame.shape
 
+frame = cv2.resize(frame,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
+
 cv2.imshow('frame', frame)
 
 frame = cv2.blur(frame,(7,7))

@@ -1652,8 +1652,9 @@ int main(int argc, char** argv){
 		string num;
 		while (getline(in,num) && getline(in, xCoord) && getline(in, yCoord)) {
 			printf("%s \n", num.c_str());
+
 			translateJ1(atoi(xCoord.c_str()), atoi(yCoord.c_str()));
-			//translateJ2(atoi(xCoord.c_str()), atoi(yCoord.c_str()));
+			translateJ2(atoi(xCoord.c_str()), atoi(yCoord.c_str()));
 		}
 	}
 

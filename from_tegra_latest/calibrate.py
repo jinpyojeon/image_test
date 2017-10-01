@@ -93,6 +93,7 @@ while(1):
 
     res[mask == 255] = [0, 255, 0]
     cv2.imshow(wnd, res)
+    cv2.imshow('secdon', res2)
 
     cv2.imshow('mask', mask)
     cv2.imshow('mask2', mask2)
