@@ -49,8 +49,8 @@ cv2.setTrackbarPos(hl, wnd,0)
 cv2.setTrackbarPos(hh, wnd,177)
 cv2.setTrackbarPos(sl, wnd,87)
 cv2.setTrackbarPos(sh, wnd,183)
-cv2.setTrackbarPos(vl, wnd,107)
-cv2.setTrackbarPos(vh, wnd,151)
+cv2.setTrackbarPos(vl, wnd,96)
+cv2.setTrackbarPos(vh, wnd,107)
 
 
 # http://docs.opencv.org/3.2.0/d4/d73/tutorial_py_contours_begin.html
@@ -65,7 +65,10 @@ while(1):
     #it is common to apply a blur to the frame
     res = cv2.GaussianBlur(frame,(7,7),0)
     res = cv2.GaussianBlur(res, (7,7), 0)
-    
+    res = cv2.GaussianBlur(res, (7,7), 0)
+    res = cv2.GaussianBlur(res, (7,7), 0)
+    res = cv2.GaussianBlur(res, (7,7), 0)
+    res = cv2.GaussianBlur(res, (7,7), 0)
  
     #convert from a BGR stream to an HSV stream
     hsv=cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
@@ -84,8 +87,23 @@ while(1):
  
     #create a mask for that range
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
+ 
+    white_points = cv2.findNonZero(mask)
+    
+    if white_points is not None:
+        x,y,w,h = cv2.boundingRect(white_points)
+        rect = cv2.minAreaRect(white_points)
+        box = cv2.cv.BoxPoints(rect)
+        box = np.int0(box)
+        (x_c,y_c),radius = cv2.minEnclosingCircle(white_points)
+        center = (int(x_c),int(y_c))
+        radius = int(radius)
+        cv2.circle(res,center,radius,(0,255,0),5)
+        cv2.drawContours(res,[box],0,(0,0,255),2)
+        cv2.rectangle(res,(x,y),(x+w,y+h),(255,255,255),5)
+        # cv2.rectangle(mask,(x,y),(x+w,y+h),(255,255,255),5)
 
-    res2, contours, hierarchy = cv2.findContours()
+    # res2, contours, hierarchy = cv2.findContours()
 
     #res = cv2.bitwise_and(frame,frame, mask =mask)
  
