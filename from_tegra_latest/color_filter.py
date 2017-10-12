@@ -6,11 +6,11 @@ import sys
 #'optional' argument is required for trackbar creation parameters
 def nothing(arg):
     pass
- 
+
 #Capture video from the stream
 frame = cv2.imread(sys.argv[1])
 cv2.namedWindow('Colorbars') #Create a window named 'Colorbars'
- 
+
 #assign strings for ease of coding
 hh='Hue High'
 hl='Hue Low'
@@ -64,12 +64,12 @@ while(1):
 
     #it is common to apply a blur to the frame
     res = cv2.GaussianBlur(frame,(7,7),0)
-    res = cv2.GaussianBlur(res, (7,7), 0)
-    res = cv2.GaussianBlur(res, (7,7), 0)
-    res = cv2.GaussianBlur(res, (7,7), 0)
-    res = cv2.GaussianBlur(res, (7,7), 0)
-    res = cv2.GaussianBlur(res, (7,7), 0)
- 
+    # res = cv2.GaussianBlur(res, (7,7), 0)
+    # res = cv2.GaussianBlur(res, (7,7), 0)
+    # res = cv2.GaussianBlur(res, (7,7), 0)
+    # res = cv2.GaussianBlur(res, (7,7), 0)
+    # res = cv2.GaussianBlur(res, (7,7), 0)
+
     #convert from a BGR stream to an HSV stream
     hsv=cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
 
@@ -80,16 +80,16 @@ while(1):
     sah=cv2.getTrackbarPos(sh, wnd)
     val=cv2.getTrackbarPos(vl, wnd)
     vah=cv2.getTrackbarPos(vh, wnd)
- 
+
     #make array for final values
     HSVLOW=np.array([hul,sal,val])
     HSVHIGH=np.array([huh,sah,vah])
- 
+
     #create a mask for that range
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
- 
+
     white_points = cv2.findNonZero(mask)
-    
+
     if white_points is not None:
         x,y,w,h = cv2.boundingRect(white_points)
         rect = cv2.minAreaRect(white_points)
@@ -106,10 +106,10 @@ while(1):
     # res2, contours, hierarchy = cv2.findContours()
 
     #res = cv2.bitwise_and(frame,frame, mask =mask)
- 
+
     #cv2.imshow(wnd, res)
 
-    res[mask == 255] = [0, 255, 0]
+    #res[mask == 255] = [0, 255, 0]
     cv2.imshow(wnd, res)
 
     cv2.imshow('mask', mask)
@@ -117,7 +117,5 @@ while(1):
     k = cv2.waitKey(5)
     if k == ord('q'):
         break
- 
+
 cv2.destroyAllWindows()
-
-
