@@ -9,7 +9,7 @@ def nothing(arg):
 
 #Capture video from the stream
 frame = cv2.imread(sys.argv[1])
-cv2.namedWindow('Colorbars') #Create a window named 'Colorbars'
+cv2.namedWindow('Colorbars', cv2.WINDOW_NORMAL) #Create a window named 'Colorbars'
 
 #assign strings for ease of coding
 hh='Hue High'
@@ -26,6 +26,7 @@ cv2.createTrackbar(sl, wnd,0,255,nothing)
 cv2.createTrackbar(sh, wnd,0,255,nothing)
 cv2.createTrackbar(vl, wnd,0,255,nothing)
 cv2.createTrackbar(vh, wnd,0,255,nothing)
+cv2.createTrackbar("sobel", wnd, 0, 255, nothing)
 
 # for black
 # cv2.setTrackbarPos(hl, wnd,0)
@@ -64,11 +65,19 @@ while(1):
 
     #it is common to apply a blur to the frame
     res = cv2.GaussianBlur(frame,(7,7),0)
+    res = cv2.GaussianBlur(res, (7,7), 0)
+    res = cv2.GaussianBlur(res, (7,7), 0)
+    res = cv2.GaussianBlur(res, (7,7), 0)
     # res = cv2.GaussianBlur(res, (7,7), 0)
     # res = cv2.GaussianBlur(res, (7,7), 0)
-    # res = cv2.GaussianBlur(res, (7,7), 0)
-    # res = cv2.GaussianBlur(res, (7,7), 0)
-    # res = cv2.GaussianBlur(res, (7,7), 0)
+    sobelx8u = cv2.Sobel(frame, cv2.CV_8U,1,0,ksize=5)
+
+    sobelx64f = cv2.Sobel(frame, cv2.CV_64F, 1,0,ksize=5)
+    abs_sobel64f = np.absolute(sobelx64f)
+    sobel_8u = np.uint8(abs_sobel64f)
+
+    laplacian = cv2.Laplacian(res, cv2.CV_64F)
+
 
     #convert from a BGR stream to an HSV stream
     hsv=cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
@@ -80,6 +89,7 @@ while(1):
     sah=cv2.getTrackbarPos(sh, wnd)
     val=cv2.getTrackbarPos(vl, wnd)
     vah=cv2.getTrackbarPos(vh, wnd)
+    sobel_min = cv2.getTrackbarPos("sobel", wnd)
 
     #make array for final values
     HSVLOW=np.array([hul,sal,val])
@@ -87,6 +97,10 @@ while(1):
 
     #create a mask for that range
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
+    inverse_mask = cv2.bitwise_not(mask)
+
+    sobel_mask = cv2.inRange(sobel_8u, sobel_min, 255)
+
 
     white_points = cv2.findNonZero(mask)
 
@@ -110,9 +124,19 @@ while(1):
     #cv2.imshow(wnd, res)
 
     #res[mask == 255] = [0, 255, 0]
-    cv2.imshow(wnd, res)
+    #sobel_8u = cv2.resize(sobel_8u, (600, 600))
+    # laplacian = cv2.resize(laplacian, (600, 600))
+    sobel_mask = cv2.resize(sobel_mask, (600, 600))
+    cv2.imshow('sobel', sobel_mask)
 
+    cv2.imshow(wnd, res)
+    cv2.resizeWindow(wnd, 600, 600)
+
+    mask = cv2.resize(mask, (600, 600))
     cv2.imshow('mask', mask)
+
+    inverse_mask = cv2.resize(inverse_mask, (600, 600))
+    cv2.imshow('inverse', inverse_mask)
 
     k = cv2.waitKey(5)
     if k == ord('q'):

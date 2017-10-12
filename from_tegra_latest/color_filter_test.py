@@ -42,6 +42,8 @@ for f in os.listdir(sys.argv[1]):
     print 'processsing', f
     #it is common to apply a blur to the frame
     res = cv2.GaussianBlur(frame,(9,9),0)
+    res = cv2.GaussianBlur(res,(9,9),0)
+    res = cv2.GaussianBlur(res,(9,9),0)
     # res = frame.copy()
 
     #convert from a BGR stream to an HSV stream
@@ -49,10 +51,10 @@ for f in os.listdir(sys.argv[1]):
 
     #read trackbar positions for each trackbar
     hul = 25
-    huh = 35
-    sal = 90
-    sah = 110
-    val = 200
+    huh = 40
+    sal = 100
+    sah = 139
+    val = 214
     vah = 255
 
     #make array for final values
