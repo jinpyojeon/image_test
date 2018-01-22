@@ -19,35 +19,41 @@ def filter_image(frame):
 
     hsv= cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
 
-    hul, sal, val = [0, 130, 130]
-    huh, sah, vah = [30, 255, 255]
+    hul, sal, val = [0, 170, 0]
+    huh, sah, vah = [15, 255, 255]
 
     HSVLOW=np.array([hul,sal,val])
     HSVHIGH=np.array([huh,sah,vah])
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
+
+    hsvMask = mask.copy()
  
     # white_points = cv2.findNonZero(mask)
     # edges = cv2.Canny(mask, 100, 200, 3)
-    contours,hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # contours,hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     rectangle_list = []
     rectangle_map = {}
 
-    for cnt in contours:
-        x,y,w,h = cv2.boundingRect(cnt)
-        cv2.rectangle(res,(x,y),(x+w,y+h),(0,0,0),-1)
+    # for cnt in contours:
+    #     x,y,w,h = cv2.boundingRect(cnt)
+    #     cv2.rectangle(res,(x,y),(x+w,y+h),(0,0,0),-1)
 
-    mask = cv2.cvtColor(res, cv2.COLOR_RGB2GRAY)
+    # mask = cv2.cvtColor(res, cv2.COLOR_RGB2GRAY)
 
     # res[mask = 255] = [0, 255, 0]
     
     structuringElement = cv2.getStructuringElement(cv2.MORPH_RECT, (70, 70))
     structuringElement2 = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 50))
-    mask = cv2.morphologyEx( mask, cv2.MORPH_CLOSE, structuringElement2 )
 
-    mask = cv2.morphologyEx( mask, cv2.MORPH_CLOSE, structuringElement )
+    lineElement = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 90))
+    mask = cv2.morphologyEx( mask, cv2.MORPH_CLOSE, lineElement )
 
-    res = cv2.bitwise_and(frame,frame, mask=mask)
+    lines = cv2.HoughLinesP(mask, rho=1, theta=np.pi / 180, threshold=100, minLineLength=150, maxLineGap=100)
+
+    # mask = cv2.morphologyEx( mask, cv2.MORPH_CLOSE, structuringElement )
+
+    res = cv2.bitwise_and(frame,frame, mask=~mask)
 
 
     # NEARBY_RANGE = 100
@@ -107,9 +113,10 @@ def filter_image(frame):
         # cv2.drawContours(res,[box],0,(0,0,255),2)
         # cv2.rectangle(res,(x,y),(x+w,y+h),(255,255,255),5)
         # cv2.rectangle(mask,(x,y),(x+w,y+h),(255,255,255),5)
+    mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    hsvMask = cv2.cvtColor(hsvMask, cv2.COLOR_GRAY2BGR)
 
-
-    side_comp = cv2.vconcat([res, frame])
+    side_comp = cv2.vconcat([res, mask, hsvMask, frame])
     height, width, _ = side_comp.shape
     side_comp_res = cv2.resize(side_comp, (height / 2, width / 2))
  
@@ -135,7 +142,7 @@ while(cap.isOpened()):
   ret, frame = cap.read()
   if ret == True:
 
-    if cv2.waitKey(25) & 0xFF == ord('w'):
+    if cv2.waitKey(20) & 0xFF == ord('w'):
       continue
 
     if every_other:
@@ -148,7 +155,7 @@ while(cap.isOpened()):
     cv2.imshow('frame', res)
 
     # Press Q on keyboard to  exit
-    if cv2.waitKey(25) & 0xFF == ord('q'):
+    if cv2.waitKey(20) & 0xFF == ord('q'):
       break
  
   # Break the loop
