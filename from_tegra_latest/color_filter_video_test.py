@@ -15,16 +15,18 @@ def find_if_close(cnt1,cnt2):
                 return False
 
 def filter_image(frame):
-    res = cv2.GaussianBlur(frame,(9,9),0)
+    blurred = cv2.GaussianBlur(frame,(9,9),0)
 
-    hsv= cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
+    hsv= cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-    hul, sal, val = [0, 170, 0]
-    huh, sah, vah = [15, 255, 255]
+    lower_orange=np.array([0,170,0])
+    upper_orange=np.array([15,255,255])
+    mask = cv2.inRange(hsv,lower_orange,upper_orange)
 
-    HSVLOW=np.array([hul,sal,val])
-    HSVHIGH=np.array([huh,sah,vah])
-    mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
+    lower_white = np.array([0, 0, 210])
+    upper_white = np.array([255, 210, 255])
+    white_mask = cv2.inRange(hsv, lower_white, upper_white)
+    white_edges = cv2.Canny(white_mask, 10, 30, 3)
 
     hsvMask = mask.copy()
  
@@ -47,16 +49,23 @@ def filter_image(frame):
     structuringElement2 = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 50))
 
     lineElement = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 90))
-    mask = cv2.morphologyEx( mask, cv2.MORPH_CLOSE, lineElement )
+    mask = cv2.morphologyEx( mask, cv2.MORPH_CLOSE, lineElement)
+    white_edges = cv2.bitwise_and(white_edges, white_edges, mask=~mask)
+    
+    laneLines= cv2.HoughLinesP(white_edges, rho=1, theta=np.pi/360, threshold=100, minLineLength=60, maxLineGap=25)
 
-    lines = cv2.HoughLinesP(mask, rho=1, theta=np.pi / 180, threshold=100, minLineLength=150, maxLineGap=100)
+    # lines = cv2.HoughLinesP(mask, rho=1, theta=np.pi / 180, threshold=100, minLineLength=150, maxLineGap=100)
 
     # mask = cv2.morphologyEx( mask, cv2.MORPH_CLOSE, structuringElement )
 
-    res = cv2.bitwise_and(frame,frame, mask=~mask)
+    res = cv2.bitwise_and(frame, frame, mask=~mask)
+    
+    if laneLines is not None:
+        for l in laneLines[0]:
+            cv2.line(mask, (l[0], l[1]), (l[2], l[3]), (255, 255, 255), 4)
 
-
-    # NEARBY_RANGE = 100
+    
+	# NEARBY_RANGE = 100
     # LENGTH = len(contours)
     # status = np.zeros((LENGTH,1))
 
@@ -114,7 +123,7 @@ def filter_image(frame):
         # cv2.rectangle(res,(x,y),(x+w,y+h),(255,255,255),5)
         # cv2.rectangle(mask,(x,y),(x+w,y+h),(255,255,255),5)
     mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-    hsvMask = cv2.cvtColor(hsvMask, cv2.COLOR_GRAY2BGR)
+    hsvMask = cv2.cvtColor(white_edges, cv2.COLOR_GRAY2BGR)
 
     side_comp = cv2.vconcat([res, mask, hsvMask, frame])
     height, width, _ = side_comp.shape
